@@ -132,7 +132,7 @@ class Development(Common):
     """
     DEBUG = True
 
-    ALLOWED_HOSTS = []
+    ALLOWED_HOSTS = ['maliyo.pythonanywhere.com' ]
 
     INTERNAL_IPS = [
         '127.0.0.1'
@@ -165,4 +165,4 @@ class Production(Staging):
     """
     The in-production settings.
     """
-    pass
+    ALLOWED_HOSTS = ['maliyo.pythonanywhere.com' ]
