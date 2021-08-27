@@ -164,5 +164,8 @@ class Staging(Common):
 class Production(Staging):
     """
     The in-production settings.
+    
     """
-    ALLOWED_HOSTS = ['maliyo.pythonanywhere.com' ]
+    DEBUG = False
+    ALLOWED_HOSTS = ['maliyo.pythonanywhere.com', 
+                     'maliyo-api.herokuapp.com' ]
