@@ -168,11 +168,13 @@ class Production(Staging):
     The in-production settings.
     
     """
-    #Cors headers
-    CORS_ORIGIN_ALLOW_ALL = True
-    CORS_ALLOW_ALL_ORIGINS = True
-    CORS_ALLOW_CREDENTIALS = True
-    
-    DEBUG = False
     ALLOWED_HOSTS = ['maliyo.pythonanywhere.com', 
                      'maliyo-api.herokuapp.com' ]
+    
+    #Cors headers
+    CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ORIGIN_WHITELIST = (
+        'maliyo-api.herokuapp.com'
+        )
+    
+    DEBUG = False
