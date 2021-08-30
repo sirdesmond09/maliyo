@@ -32,8 +32,8 @@ class OTP(models.Model):
     expiry_date = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=2))
     
     
-    def not_expired(self):
-        return timezone.now() < self.expiry_date
+    def expired(self):
+        return timezone.now() > self.expiry_date
     
     def __str__(self):
         return self.code
