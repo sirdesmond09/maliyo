@@ -29,11 +29,11 @@ class Student(models.Model):
 class OTP(models.Model):
     code = models.CharField(max_length=6)
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='otps')
-    expiry_date = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=2))
+    expiry_date = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=5))
     
     
-    def not_expired(self):
-        return timezone.now() < self.expiry_date
+    def expired(self):
+        return timezone.now() > self.expiry_date
     
     def __str__(self):
         return self.code

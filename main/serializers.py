@@ -64,7 +64,7 @@ class OTPVerifySerializer(serializers.Serializer):
         if len(otp) == 6 and OTP.objects.filter(code=otp).exists():
             otp = OTP.objects.get(code=otp)
             
-            if otp.not_expired():
+            if not otp.expired():
             
                 if otp.student.is_verified == False:
                     otp.student.is_verified=True
