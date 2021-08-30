@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models import deletion
 from django.utils import timezone
 
 # Create your models here.
@@ -8,7 +7,7 @@ def batch_date():
     return timezone.now().strftime('%B-%Y')
     
 class Student(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, null=True, blank=True)
     email = models.EmailField()
     batch = models.CharField(default=batch_date, max_length=200)
     time_added = models.DateTimeField(default=timezone.now)
