@@ -49,10 +49,10 @@ class Common(Configuration):
     ]
 
     MIDDLEWARE = [
-        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.security.SecurityMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
+        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -65,7 +65,7 @@ class Common(Configuration):
     TEMPLATES = [
         {
             'BACKEND': 'django.template.backends.django.DjangoTemplates',
-            'DIRS': [],
+            'DIRS': [os.path.join(BASE_DIR, 'build')],
             'APP_DIRS': True,
             'OPTIONS': {
                 'context_processors': [
@@ -85,7 +85,12 @@ class Common(Configuration):
     DATABASES = values.DatabaseURLValue(
         'sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
     )
+    
+    #cors
+    CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_ALL_ORIGINS = True
 
+    
     # Password validation
     # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
     AUTH_PASSWORD_VALIDATORS = [
@@ -119,6 +124,9 @@ class Common(Configuration):
     # https://docs.djangoproject.com/en/3.0/howto/static-files/
     STATIC_URL = '/static/'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'build/static')
+    ]
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
     # Default primary key field type
@@ -171,10 +179,6 @@ class Production(Staging):
     ALLOWED_HOSTS = ['maliyo.pythonanywhere.com', 
                      'maliyo-api.herokuapp.com' ]
     
-    #Cors headers
-    CORS_ORIGIN_ALLOW_ALL = True
-    CORS_ORIGIN_WHITELIST = (
-        'maliyo-api.herokuapp.com'
-        )
+    
     
     DEBUG = False
