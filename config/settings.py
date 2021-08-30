@@ -41,6 +41,7 @@ class Common(Configuration):
 
         'users',
         'main',
+        'corsheaders',
         
         #docs
         'drf_yasg',
@@ -48,6 +49,7 @@ class Common(Configuration):
     ]
 
     MIDDLEWARE = [
+        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.security.SecurityMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -132,9 +134,9 @@ class Development(Common):
     """
     DEBUG = True
 
-    ALLOWED_HOSTS = ['maliyo.pythonanywhere.com' ]
+    ALLOWED_HOSTS = []
 
-    INTERNAL_IPS = [
+    INTERNAL_IPS = [ 
         '127.0.0.1'
     ]
 
@@ -166,6 +168,11 @@ class Production(Staging):
     The in-production settings.
     
     """
+    #Cors headers
+    CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ALLOW_ALL_ORIGINS = True
+    CORS_ALLOW_CREDENTIALS = True
+    
     DEBUG = False
     ALLOWED_HOSTS = ['maliyo.pythonanywhere.com', 
                      'maliyo-api.herokuapp.com' ]
