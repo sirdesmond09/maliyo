@@ -64,8 +64,10 @@ class OTPVerifySerializer(serializers.Serializer):
         if len(otp) == 6 and OTP.objects.filter(code=otp).exists():
             otp = OTP.objects.get(code=otp)
             
-            if not otp.expired():
+            if otp.expired():
             
+                raise serializers.ValidationError(detail='OTP expired')
+            else:
                 if otp.student.is_verified == False:
                     otp.student.is_verified=True
                     otp.student.save()
@@ -73,10 +75,6 @@ class OTPVerifySerializer(serializers.Serializer):
                     return {'message': 'Verification Complete', 'data':serializer.data}
                 else:
                     raise serializers.ValidationError(detail='Student with this otp has been verified before.')
-                    
-            
-            else:
-                raise serializers.ValidationError(detail='OTP expired')
                     
         
         else:
