@@ -1,10 +1,12 @@
+from config import settings
 from rest_framework import serializers
 from .models import Bank, Student, batch_date, OTP, StudentBankDetail
-import math, random, requests, os, pyotp
+import requests, os, pyotp
 from .helpers.verify_bank import bank_verification
+from django.core.mail import send_mail
  
 # function to generate OTP
-totp = pyotp.TOTP('base32secret3232', interval=30)
+totp = pyotp.TOTP('base32secret3232', interval=60)
 
 def get_otp():
     """This functions generates an otp and calls itself if the otp exists in the database already."""
@@ -42,7 +44,23 @@ class EmailVerifySerializer(serializers.Serializer):
             if student.is_verified == False:
                 
                 code = get_otp()
-                print(code)
+                
+                subject = "COMPLETE YOUR VERIFICATION ON MALIYO"
+                
+                message = f"""Hi, {student.name}!
+Kindly complete your verification on the maliyo games portal with the OTP below:
+
+                {code}        
+
+Expires in 60 seconds!
+
+Thank you,
+Maliyo Games.                
+"""
+                email_from = settings.Common.DEFAULT_FROM_EMAIL
+                recipient_list = [email]
+                send_mail( subject, message, email_from, recipient_list)
+                
                 OTP.objects.create(code=code, student=student)
                 return {'message': 'Please check your email for OTP.', 'data':serializer.data}
             
