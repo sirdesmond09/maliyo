@@ -1,10 +1,16 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Bank, Student
+from .models import Bank, Student, StudentBankDetail
 from .serializers import BankSerializer, StudentBankDetailSerializer, StudentBankVerificationSerializer, StudentUploadSerializer, EmailVerifySerializer, OTPVerifySerializer
 from drf_yasg.utils import swagger_auto_schema
 from .helpers import upload
+
+import csv
+
+from django.http import HttpResponse
+from datetime import datetime
+
 
 
 @swagger_auto_schema(methods=['POST'], request_body=EmailVerifySerializer())
@@ -163,4 +169,51 @@ def bank_details(request):
 
             return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
         
+
+
+@api_view(['GET'])
+def all_bank_details(request):
+    """Api view to get all the account details of all verified students!"""
+    
+    obj = StudentBankDetail.objects.all()
+    serializer = StudentBankDetailSerializer(obj, many=True)
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
+    
+
+
+@api_view(['GET'])
+def download_bank_details(request):
+    """Api view to download the bank details as csv"""
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="bank_details.csv"'
+
+    writer = csv.writer(response)
+    
+    writer.writerow([
+            'account_number',
+            'account_name',
+            'recipient_code',
+            'bank_name',
+            'student_name',
+            'date_added'
+        ])
+    
+
+    for bank in StudentBankDetail.objects.all():
+
+        writer.writerow([
+            bank.account_number,
+            bank.account_name,
+            bank.recipient_code,
+            bank.bank.bank_name,
+            bank.student.name,
+            datetime.strftime(bank.date_added, '%d-%m-%Y')
+        ])
         
+
+       
+        
+
+    return response
+    

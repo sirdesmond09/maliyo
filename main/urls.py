@@ -8,6 +8,8 @@ urlpatterns = [
     path('students/bank_verification/', views.bank_verification),
     path('students/save_bank_details/', views.bank_details),
     path('students/upload/', views.upload_students),
-    path('banks/', views.get_banks)
+    path('students/download/', views.download_bank_details),
+    path('students/bank_details/', views.all_bank_details),
+    path('banks/', views.get_banks),
 
 ]
