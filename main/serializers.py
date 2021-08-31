@@ -30,13 +30,13 @@ class EmailVerifySerializer(serializers.Serializer):
         
         if Student.objects.filter(email=email, batch=batch_date(), is_active=True).exists():
             student = Student.objects.get(email=email, batch=batch_date(), is_active=True)
-            
+            serializer = StudentSerializer(student)
             if student.is_verified == False:
                 
                 code = totp.now()
                 print(code)
                 OTP.objects.create(code=code, student=student)
-                return {'message': 'Please check your email for OTP.'}
+                return {'message': 'Please check your email for OTP.', 'data':serializer.data}
             
             else:
                 raise serializers.ValidationError(detail='Student with this email has been verified before.')
