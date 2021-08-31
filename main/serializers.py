@@ -4,7 +4,15 @@ import math, random, requests, os, pyotp
 from .helpers.verify_bank import bank_verification
  
 # function to generate OTP
-totp = pyotp.TOTP('base32secret3232', interval=300)
+totp = pyotp.TOTP('base32secret3232', interval=30)
+
+def get_otp():
+    """This functions generates an otp and calls itself if the otp exists in the database already."""
+    
+    otp = totp.now()
+    if OTP.objects.filter(code=otp).exists():
+        return get_otp()
+    return otp
 
 class StudentSerializer(serializers.ModelSerializer):
     
@@ -33,7 +41,7 @@ class EmailVerifySerializer(serializers.Serializer):
             serializer = StudentSerializer(student)
             if student.is_verified == False:
                 
-                code = totp.now()
+                code = get_otp()
                 print(code)
                 OTP.objects.create(code=code, student=student)
                 return {'message': 'Please check your email for OTP.', 'data':serializer.data}
