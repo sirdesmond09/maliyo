@@ -31,9 +31,7 @@ class OTP(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='otps')
     expiry_date = models.DateTimeField(default=timezone.now() + timezone.timedelta(minutes=5))
     
-    
-    def expired(self):
-        return timezone.now() > self.expiry_date
+
     
     def __str__(self):
         return self.code
@@ -53,6 +51,16 @@ class StudentBankDetail(models.Model):
     recipient_code = models.CharField(max_length=200, null=True, blank=True)
     bank = models.ForeignKey(Bank, on_delete=models.DO_NOTHING)
     student=models.ForeignKey(Student, on_delete=models.DO_NOTHING)
+    date_added = models.DateField(auto_now_add=True)
     
     def __str__(self):
         return self.recipient_code
+    
+    @property
+    def student_name(self):
+        return self.student.name
+    
+    
+    @property
+    def bank_name(self):
+        return self.bank.bank_name

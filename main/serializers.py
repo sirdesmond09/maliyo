@@ -1,19 +1,10 @@
 from rest_framework import serializers
 from .models import Bank, Student, batch_date, OTP, StudentBankDetail
-import math, random, requests, os
+import math, random, requests, os, pyotp
 from .helpers.verify_bank import bank_verification
  
 # function to generate OTP
-
-def generate_otp() :
- 
-    digits = "0123456789"
-    code = ""
-
-    for i in range(6) :
-        code += digits[math.floor(random.random() * 10)]
- 
-    return code
+totp = pyotp.TOTP('base32secret3232', interval=300)
 
 class StudentSerializer(serializers.ModelSerializer):
     
@@ -41,7 +32,8 @@ class EmailVerifySerializer(serializers.Serializer):
             student = Student.objects.get(email=email, batch=batch_date(), is_active=True)
             
             if student.is_verified == False:
-                code = generate_otp()
+                
+                code = totp.now()
                 print(code)
                 OTP.objects.create(code=code, student=student)
                 return {'message': 'Please check your email for OTP.'}
@@ -64,17 +56,23 @@ class OTPVerifySerializer(serializers.Serializer):
         if len(otp) == 6 and OTP.objects.filter(code=otp).exists():
             otp = OTP.objects.get(code=otp)
             
-            if otp.expired():
-            
-                raise serializers.ValidationError(detail='OTP expired')
-            else:
+            if totp.verify(otp):
                 if otp.student.is_verified == False:
                     otp.student.is_verified=True
                     otp.student.save()
+                    
+                    #clear all otp for this student after verification
+                    all_otps = OTP.objects.filter(student=otp.student)
+                    all_otps.delete()
+                    
                     serializer = StudentSerializer(otp.student)
                     return {'message': 'Verification Complete', 'data':serializer.data}
                 else:
                     raise serializers.ValidationError(detail='Student with this otp has been verified before.')
+            
+                
+            else:
+                raise serializers.ValidationError(detail='OTP expired')
                     
         
         else:
@@ -112,10 +110,12 @@ class StudentBankVerificationSerializer(serializers.Serializer):
         return data
     
 class StudentBankDetailSerializer(serializers.ModelSerializer):
+    student_name = serializers.ReadOnlyField()
+    bank_name = serializers.ReadOnlyField()
     
     class Meta:
         model = StudentBankDetail
-        fields = '__all__'
+        fields = ['account_number', 'account_name', 'recipient_code', 'bank', 'student', 'student_name', 'bank_name', 'date_added']
         
     
     def add_recepient(self):
