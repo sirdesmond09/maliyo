@@ -134,6 +134,14 @@ class Common(Configuration):
     DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
     AUTH_USER_MODEL = 'users.User'
+    
+    DEFAULT_FROM_EMAIL = 'admin@pay.maliyo.com'
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_USE_SSL = True
+    EMAIL_PORT = 465
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
 
 
 class Development(Common):
@@ -182,3 +190,5 @@ class Production(Staging):
     
     
     DEBUG = False
+    
+    

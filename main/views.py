@@ -191,6 +191,7 @@ def download_bank_details(request):
     writer = csv.writer(response)
     
     writer.writerow([
+            's/n'
             'account_number',
             'account_name',
             'recipient_code',
@@ -199,21 +200,20 @@ def download_bank_details(request):
             'date_added'
         ])
     
-
+    count = 0
     for bank in StudentBankDetail.objects.all():
-
+        count +=1
         writer.writerow([
-            bank.account_number,
-            bank.account_name,
-            bank.recipient_code,
-            bank.bank.bank_name,
-            bank.student.name,
+            count,
+            str(bank.account_number),
+            str(bank.account_name),
+            str(bank.recipient_code),
+            str(bank.bank.bank_name),
+            str(bank.student.name),
             datetime.strftime(bank.date_added, '%d-%m-%Y')
         ])
         
 
-       
-        
 
     return response
     
