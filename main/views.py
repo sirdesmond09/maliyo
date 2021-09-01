@@ -191,7 +191,7 @@ def download_bank_details(request):
     writer = csv.writer(response)
     
     writer.writerow([
-            's/n'
+            's/n',
             'account_number',
             'account_name',
             'recipient_code',
