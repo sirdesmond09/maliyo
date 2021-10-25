@@ -18,3 +18,4 @@ class Command(BaseCommand):
             if not d['is_deleted'] and d['active']:
                 bank = Bank.objects.create(bank_name=d['name'], paystack_code=d['code'])
                 self.stdout.write(self.style.SUCCESS(f"{bank.bank_name} added"))
+

@@ -1,10 +1,13 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Bank, Student, StudentBankDetail
+from .models import Bank, StudentBankDetail, User, batch_date
 from .serializers import BankSerializer, StudentBankDetailSerializer, StudentBankVerificationSerializer, StudentUploadSerializer, EmailVerifySerializer, OTPVerifySerializer
 from drf_yasg.utils import swagger_auto_schema
 from .helpers import upload
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 import csv
 
@@ -80,17 +83,19 @@ def upload_students(request):
                 return Response(data, status = status.HTTP_400_BAD_REQUEST)
             
             success = False
+            users = []
             for row in rows:
                 success = False
                 try:
 
-                    Student.objects.create(**row, is_active=True)
+                    users.append(User(**row, is_active=True))
 
                     success = True
                 except Exception:
                     success = False
                     
             if success == True:
+                User.objects.bulk_create(users)
                 data = {
                     'status'  : True,
                     'message' : "File upload successful",
@@ -134,6 +139,8 @@ def get_banks(request):
 
 @swagger_auto_schema(methods=['POST'], request_body=StudentBankVerificationSerializer())
 @api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def bank_verification(request):
     
     """Api view for verifying bank accounts """
@@ -143,6 +150,9 @@ def bank_verification(request):
         serializer = StudentBankVerificationSerializer(data = request.data)
 
         if serializer.is_valid():
+            if StudentBankDetail.objects.filter(student=request.user, month=batch_date, is_active=True).exists():
+                raise ValidationError(detail="Bank details already verified for this month. Please wait till next month.")
+            
             data = serializer.verify_bank_details()
             
             return Response(data, status=status.HTTP_200_OK)
