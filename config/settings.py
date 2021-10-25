@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 
 from configurations import Configuration, values
-
+from django.utils.timezone import timedelta
 
 
 class Common(Configuration):
@@ -19,7 +19,7 @@ class Common(Configuration):
     BASE_DIR = Path(__file__).resolve().parent.parent
 
     # SECURITY WARNING: keep the secret key used in production secret!
-    SECRET_KEY = values.SecretValue()
+    SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
     # SECURITY WARNING: don't run with debug turned on in production!
     DEBUG = values.BooleanValue(False)
@@ -39,13 +39,16 @@ class Common(Configuration):
         'django_extensions',
         'debug_toolbar',
 
-        'users',
+        'account',
         'main',
         'corsheaders',
         
         #docs
         'drf_yasg',
         'coreapi',
+        'rest_framework_simplejwt',
+        'rest_framework_simplejwt.token_blacklist',
+        'django_rest_passwordreset',
     ]
 
     MIDDLEWARE = [
@@ -133,15 +136,43 @@ class Common(Configuration):
     # https://docs.djangoproject.com/en/3.0/ref/settings/#default-auto-field
     DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-    AUTH_USER_MODEL = 'users.User'
+    AUTH_USER_MODEL = 'account.User'
+    
+    AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'account.authentication.UserAuthBackend'
+    ]
     
     DEFAULT_FROM_EMAIL = 'admin@pay.maliyo.com'
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = 'smtp.gmail.com'
-    EMAIL_USE_SSL = True
+    EMAIL_HOST = 'smtp.gmass.co'
+    EMAIL_USE_TLS = True
     EMAIL_PORT = 465
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_PASS')
+    
+    SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+        }
+    }
+    
+    SIMPLE_JWT = {
+        'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+        'REFRESH_TOKEN_LIFETIME': timedelta(days=5),
+        'UPDATE_LAST_LOGIN': True,
+        'SIGNING_KEY': SECRET_KEY,
+        'AUTH_HEADER_TYPES': ('Bearer',),
+        'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+        'ROTATE_REFRESH_TOKENS': True,
+        'BLACKLIST_AFTER_ROTATION': True,
+        
+
+        }
 
 
 class Development(Common):
@@ -184,6 +215,7 @@ class Production(Staging):
     The in-production settings.
     
     """
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     ALLOWED_HOSTS = ['maliyo.pythonanywhere.com', 
                      'maliyo-api.herokuapp.com' ]
     

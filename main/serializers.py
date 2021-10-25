@@ -1,28 +1,12 @@
 from config import settings
 from rest_framework import serializers
-from .models import Bank, Student, batch_date, OTP, StudentBankDetail
+from .models import Bank, batch_date, StudentBankDetail
 import requests, os, pyotp
 from .helpers.verify_bank import bank_verification
 from django.core.mail import send_mail
  
 # function to generate OTP
-totp = pyotp.TOTP('base32secret3232', interval=60)
-
-def get_otp():
-    """This functions generates an otp and calls itself if the otp exists in the database already."""
-    
-    otp = totp.now()
-    if OTP.objects.filter(code=otp).exists():
-        return get_otp()
-    return otp
-
-class StudentSerializer(serializers.ModelSerializer):
-    
-    class Meta:
-        model = Student
-        fields = '__all__'
-        
-        
+ 
 
 class StudentUploadSerializer(serializers.Serializer):
     file = serializers.FileField(required=True)
@@ -122,16 +106,13 @@ class StudentBankVerificationSerializer(serializers.Serializer):
     def verify_bank_details(self):
         try:
             bank = Bank.objects.get(id=self.validated_data['bank_id'])
-            student = Student.objects.get(id=self.validated_data['student_id'], batch=batch_date(), is_verified=True)
         except Bank.DoesNotExist:
             raise serializers.ValidationError(detail=f"Bank with id {self.validated_data['bank_id']} not found")
-        except Student.DoesNotExist:
-            raise serializers.ValidationError(detail=f"Student for batch {batch_date()} with id {self.validated_data['student_id']} not found")
+        
         
         data = bank_verification(code = bank.paystack_code, account_num=self.validated_data['account_num'])
         data['bank'] = bank.bank_name
         data['bank_id'] = bank.id
-        data['student_id'] = student.id
         
         return data
     
@@ -144,24 +125,27 @@ class StudentBankDetailSerializer(serializers.ModelSerializer):
         fields = ['account_number', 'account_name', 'recipient_code', 'bank', 'student', 'student_name', 'bank_name', 'date_added']
         
     
-    def add_recepient(self):
+    def add_recepient(self, request):
+        if 'student' in self.validated_data.keys():
+            self.validated_data.pop('student')
+            
         res = requests.post(
-        url = 'https://api.paystack.co/transferrecipient', 
-        data= { "type": "nuban", 
-            "name": self.validated_data["account_name"], 
-            "account_number": self.validated_data["account_number"], 
-            "bank_code": self.validated_data["bank"].paystack_code, 
-            "currency": "NGN"
-            },
-                       
-        headers={
-            'Authorization':f"Bearer {os.getenv('PAYSTACK_SECRET_KEY')}"
+            url = 'https://api.paystack.co/transferrecipient', 
+            data= { "type": "nuban", 
+                "name": self.validated_data["account_name"], 
+                "account_number": self.validated_data["account_number"], 
+                "bank_code": self.validated_data["bank"].paystack_code, 
+                "currency": "NGN"
+                },
+                        
+            headers={
+                'Authorization':f"Bearer {os.getenv('PAYSTACK_SECRET_KEY')}"
         })
         
         if res.json()['status'] == True:
             print(res.json()['data'])
             recipient_code = res.json()['data']['recipient_code'] 
-            data = StudentBankDetail.objects.create(**self.validated_data, recipient_code=recipient_code)
+            data = StudentBankDetail.objects.create(**self.validated_data, recipient_code=recipient_code, student=request.user)
             return data
         else:
             raise serializers.ValidationError(detail='Unable to add account details')

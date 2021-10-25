@@ -1,4 +1,4 @@
 from django.contrib import admin
-from .models import OTP, Student
+from .models import Bank, StudentBankDetail
 # Register your models here.
-admin.site.register([OTP, Student])
+admin.site.register([Bank, StudentBankDetail])
