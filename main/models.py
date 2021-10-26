@@ -27,6 +27,7 @@ class StudentBankDetail(models.Model):
     month = models.CharField(default=batch_date, max_length=300)
     bank = models.ForeignKey(Bank, on_delete=models.DO_NOTHING)
     date_added = models.DateField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
     
     def __str__(self):
         return self.recipient_code
@@ -39,3 +40,23 @@ class StudentBankDetail(models.Model):
     @property
     def bank_name(self):
         return self.bank.bank_name
+    
+    def delete(self):
+        self.is_active=False
+        self.save()
+        
+        return
+    
+    
+class Attendance(models.Model):
+    week = models.CharField(max_length=200)
+    time_log = models.CharField(max_length=200)
+    desc = models.TextField()
+    is_active = models.BooleanField(default=True)
+    user = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name='attendance')
+    
+    def delete(self):
+        self.is_active=False
+        self.save()
+        
+        return

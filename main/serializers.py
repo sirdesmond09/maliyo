@@ -1,6 +1,6 @@
 from config import settings
 from rest_framework import serializers
-from .models import Bank, batch_date, StudentBankDetail
+from .models import Attendance, Bank, batch_date, StudentBankDetail
 import requests, os, pyotp
 from .helpers.verify_bank import bank_verification
 from django.core.mail import send_mail
@@ -15,78 +15,78 @@ class StudentUploadSerializer(serializers.Serializer):
         fields = ('file',)
         
         
-class EmailVerifySerializer(serializers.Serializer):
-    email = serializers.EmailField()
+# class EmailVerifySerializer(serializers.Serializer):
+#     email = serializers.EmailField()
     
     
-    def verify_email(self):
-        email = self.validated_data['email']
+#     def verify_email(self):
+#         email = self.validated_data['email']
         
-        if Student.objects.filter(email=email, batch=batch_date(), is_active=True).exists():
-            student = Student.objects.get(email=email, batch=batch_date(), is_active=True)
-            serializer = StudentSerializer(student)
-            if student.is_verified == False:
+#         if Student.objects.filter(email=email, batch=batch_date(), is_active=True).exists():
+#             student = Student.objects.get(email=email, batch=batch_date(), is_active=True)
+#             serializer = StudentSerializer(student)
+#             if student.is_verified == False:
                 
-                code = get_otp()
+#                 code = get_otp()
                 
-                subject = "COMPLETE YOUR VERIFICATION ON MALIYO"
+#                 subject = "COMPLETE YOUR VERIFICATION ON MALIYO"
                 
-                message = f"""Hi, {student.name}!
-Kindly complete your verification on the maliyo games portal with the OTP below:
+#                 message = f"""Hi, {student.name}!
+# Kindly complete your verification on the maliyo games portal with the OTP below:
 
-                {code}        
+#                 {code}        
 
-Expires in 60 seconds!
+# Expires in 60 seconds!
 
-Thank you,
-Maliyo Games.                
-"""
-                email_from = settings.Common.DEFAULT_FROM_EMAIL
-                recipient_list = [email]
-                send_mail( subject, message, email_from, recipient_list)
+# Thank you,
+# Maliyo Games.                
+# """
+#                 email_from = settings.Common.DEFAULT_FROM_EMAIL
+#                 recipient_list = [email]
+#                 send_mail( subject, message, email_from, recipient_list)
                 
-                OTP.objects.create(code=code, student=student)
-                return {'message': 'Please check your email for OTP.', 'data':serializer.data}
+#                 OTP.objects.create(code=code, student=student)
+#                 return {'message': 'Please check your email for OTP.', 'data':serializer.data}
             
-            else:
-                raise serializers.ValidationError(detail='Student with this email has been verified before.')
+#             else:
+#                 raise serializers.ValidationError(detail='Student with this email has been verified before.')
                 
         
-        else:
-            raise serializers.ValidationError(detail='Student with this email not found. Plese check that the email is correct',)
+#         else:
+#             raise serializers.ValidationError(detail='Student with this email not found. Plese check that the email is correct',)
             
             
-class OTPVerifySerializer(serializers.Serializer):
-    otp = serializers.CharField(max_length=6)
+# class OTPVerifySerializer(serializers.Serializer):
+#     otp = serializers.CharField(max_length=6)
     
     
-    def verify_otp(self):
-        otp = self.validated_data['otp']
+#     def verify_otp(self):
+#         otp = self.validated_data['otp']
         
-        if len(otp) == 6 and OTP.objects.filter(code=otp).exists():
-            otp = OTP.objects.get(code=otp)
+#         if len(otp) == 6 and OTP.objects.filter(code=otp).exists():
+#             otp = OTP.objects.get(code=otp)
             
-            if totp.verify(otp):
-                if otp.student.is_verified == False:
-                    otp.student.is_verified=True
-                    otp.student.save()
+#             if totp.verify(otp):
+#                 if otp.student.is_verified == False:
+#                     otp.student.is_verified=True
+#                     otp.student.save()
                     
-                    #clear all otp for this student after verification
-                    all_otps = OTP.objects.filter(student=otp.student)
-                    all_otps.delete()
+#                     #clear all otp for this student after verification
+#                     all_otps = OTP.objects.filter(student=otp.student)
+#                     all_otps.delete()
                     
-                    serializer = StudentSerializer(otp.student)
-                    return {'message': 'Verification Complete', 'data':serializer.data}
-                else:
-                    raise serializers.ValidationError(detail='Student with this otp has been verified before.')
+#                     serializer = StudentSerializer(otp.student)
+#                     return {'message': 'Verification Complete', 'data':serializer.data}
+#                 else:
+#                     raise serializers.ValidationError(detail='Student with this otp has been verified before.')
             
                 
-            else:
-                raise serializers.ValidationError(detail='OTP expired')
+#             else:
+#                 raise serializers.ValidationError(detail='OTP expired')
                     
         
-        else:
-            raise serializers.ValidationError(detail='Invalid OTP')
+#         else:
+#             raise serializers.ValidationError(detail='Invalid OTP')
         
 
 class BankSerializer(serializers.ModelSerializer):
@@ -149,3 +149,11 @@ class StudentBankDetailSerializer(serializers.ModelSerializer):
             return data
         else:
             raise serializers.ValidationError(detail='Unable to add account details')
+        
+        
+class AttendanceSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Attendance
+        fields = '__all__'
+        
