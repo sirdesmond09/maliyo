@@ -2,8 +2,8 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Bank, StudentBankDetail, User, batch_date
-from .serializers import BankSerializer, StudentBankDetailSerializer, StudentBankVerificationSerializer, StudentUploadSerializer, EmailVerifySerializer, OTPVerifySerializer
+from .models import Attendance, Bank, StudentBankDetail, User, batch_date
+from .serializers import AttendanceSerializer, BankSerializer, StudentBankDetailSerializer, StudentBankVerificationSerializer, StudentUploadSerializer
 from drf_yasg.utils import swagger_auto_schema
 from .helpers import upload
 from rest_framework.permissions import IsAuthenticated
@@ -16,43 +16,43 @@ from datetime import datetime
 
 
 
-@swagger_auto_schema(methods=['POST'], request_body=EmailVerifySerializer())
-@api_view(['POST'])
-def email_verification(request):
+# @swagger_auto_schema(methods=['POST'], request_body=EmailVerifySerializer())
+# @api_view(['POST'])
+# def email_verification(request):
     
-    """Api view for verifying emails """
+#     """Api view for verifying emails """
 
-    if request.method == 'POST':
+#     if request.method == 'POST':
 
-        serializer = EmailVerifySerializer(data = request.data)
+#         serializer = EmailVerifySerializer(data = request.data)
 
-        if serializer.is_valid():
-            data = serializer.verify_email()
+#         if serializer.is_valid():
+#             data = serializer.verify_email()
             
-            return Response(data, status=status.HTTP_200_OK)
-        else:
+#             return Response(data, status=status.HTTP_200_OK)
+#         else:
 
-            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+#             return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
         
         
 
-@swagger_auto_schema(methods=['POST'], request_body=OTPVerifySerializer())
-@api_view(['POST'])
-def otp_verification(request):
+# @swagger_auto_schema(methods=['POST'], request_body=OTPVerifySerializer())
+# @api_view(['POST'])
+# def otp_verification(request):
     
-    """Api view for verifying OTPs """
+#     """Api view for verifying OTPs """
 
-    if request.method == 'POST':
+#     if request.method == 'POST':
 
-        serializer = OTPVerifySerializer(data = request.data)
+#         serializer = OTPVerifySerializer(data = request.data)
 
-        if serializer.is_valid():
-            data = serializer.verify_otp()
+#         if serializer.is_valid():
+#             data = serializer.verify_otp()
             
-            return Response(data, status=status.HTTP_200_OK)
-        else:
+#             return Response(data, status=status.HTTP_200_OK)
+#         else:
 
-            return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
+#             return Response(serializer.errors, status = status.HTTP_400_BAD_REQUEST)
         
         
 
@@ -185,7 +185,7 @@ def bank_details(request):
 def all_bank_details(request):
     """Api view to get all the account details of all verified students!"""
     
-    obj = StudentBankDetail.objects.all()
+    obj = StudentBankDetail.objects.filter(is_active=True)
     serializer = StudentBankDetailSerializer(obj, many=True)
     
     return Response(serializer.data, status=status.HTTP_200_OK)
@@ -211,7 +211,7 @@ def download_bank_details(request):
         ])
     
     count = 0
-    for bank in StudentBankDetail.objects.all():
+    for bank in StudentBankDetail.objects.filter(month=batch_date):
         count +=1
         writer.writerow([
             count,
@@ -226,4 +226,34 @@ def download_bank_details(request):
 
 
     return response
+    
+    
+@swagger_auto_schema(methods=['POST'], request_body=AttendanceSerializer())
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def add_attendance(request):
+    if request.method=='POST':
+        serializer = AttendanceSerializer(data=request.data)
+        if serializer.is_valid():
+            if 'user' in serializer.validated_data.keys():
+                serializer.validated_data.pop('user')
+                
+            Attendance.objects.create(**serializer.validated_data, user=request.user)
+            
+            return Response({"message":'success'}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"error":serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
+def get_records(request):
+    
+    obj = Attendance.objects.filter(is_active=True, user=request.user)
+    serializer = AttendanceSerializer(obj, many=True)
+    
+    return Response(serializer.data, status=status.HTTP_200_OK)
     
