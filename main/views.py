@@ -163,6 +163,8 @@ def bank_verification(request):
         
 @swagger_auto_schema(methods=['POST'], request_body=StudentBankDetailSerializer())
 @api_view(['POST'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def bank_details(request):
     
     """Api view for verifying bank accounts """
