@@ -12,6 +12,9 @@ from pathlib import Path
 
 from configurations import Configuration, values
 from django.utils.timezone import timedelta
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
 
 
 class Common(Configuration):
@@ -173,6 +176,21 @@ class Common(Configuration):
         
 
         }
+    
+    
+    sentry_sdk.init(
+        dsn="https://480285ad530c4d45bfa3aaaac3b0766b@o1037728.ingest.sentry.io/6044306",
+        integrations=[DjangoIntegration()],
+
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=1.0,
+
+        # If you wish to associate users to errors (assuming you are using
+        # django.contrib.auth) you may enable sending PII data.
+        send_default_pii=True
+    )
 
 
 class Development(Common):
