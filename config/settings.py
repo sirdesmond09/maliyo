@@ -239,6 +239,6 @@ class Production(Staging):
     
     
     
-    DEBUG = True
+    DEBUG = False
     
     

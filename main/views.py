@@ -172,7 +172,7 @@ def bank_details(request):
         serializer = StudentBankDetailSerializer(data = request.data)
 
         if serializer.is_valid():
-            data = serializer.add_recepient()
+            data = serializer.add_recepient(request)
             serializer = StudentBankDetailSerializer(data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
