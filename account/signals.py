@@ -29,7 +29,7 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
         recipient_list= [reset_password_token.user.email]
     )
     
-    
+
 @receiver(post_save, sender=User)
 def notify_user(sender, instance, created, **kwargs):
     if created:
@@ -39,7 +39,7 @@ def notify_user(sender, instance, created, **kwargs):
 Thank you for signing up for the AWS fundamental training. Kindly find your login details below:
                 {instance.email}
                 {instance.password}        
-
+Follow this link to login: https://ucheckin.univelcity.com/
 Thank you,
 Support Team                
 """   
