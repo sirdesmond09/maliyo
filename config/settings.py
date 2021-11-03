@@ -87,11 +87,7 @@ class Common(Configuration):
 
     WSGI_APPLICATION = 'config.wsgi.application'
 
-    # Database
-    # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
-    DATABASES = values.DatabaseURLValue(
-        'sqlite:///{}'.format(os.path.join(BASE_DIR, 'db.sqlite3'))
-    )
+    
     
     #cors
     CORS_ORIGIN_ALLOW_ALL = True
@@ -209,6 +205,12 @@ class Development(Common):
     MIDDLEWARE = Common.MIDDLEWARE + [
         'debug_toolbar.middleware.DebugToolbarMiddleware'
     ]
+    
+    # Database
+    # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
+    DATABASES = values.DatabaseURLValue(
+        'sqlite:///{}'.format(os.path.join(Common.BASE_DIR, 'db.sqlite3'))
+    )
 
 
 class Staging(Common):
@@ -242,4 +244,18 @@ class Production(Staging):
     
     DEBUG = False
     
+    DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('PROD_DB_NAME'),
+        'USER': os.getenv('PROD_DB_USER'),
+        'PASSWORD': os.getenv('PROD_DB_PASSWORD'),
+        'HOST': os.getenv('PROD_DB_HOST'),
+        'PORT': "",
+        }
+    }
     
+    
+
+
+
