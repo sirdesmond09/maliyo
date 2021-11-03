@@ -13,5 +13,6 @@ urlpatterns = [
     path('banks/', views.get_banks),
     path('students/clockins/', views.add_attendance),
     path('students/my_clockins/', views.get_records),
+    path('students/activities/<int:user_id>/', views.user_record),
 
 ]
