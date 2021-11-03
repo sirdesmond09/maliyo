@@ -238,7 +238,8 @@ class Production(Staging):
     """
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
     ALLOWED_HOSTS = ['maliyo.pythonanywhere.com', 
-                     'maliyo-api.herokuapp.com' ]
+                     'maliyo-api.herokuapp.com' ,
+                     '138.68.134.182']
     
     
     
