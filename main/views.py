@@ -269,7 +269,7 @@ def user_record(request, user_id):
     except User.DoesNotExist:
         return Response({"error":'Does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
-    month = StudentBankDetail.objects.filter(is_active=True, user=user)
+    month = StudentBankDetail.objects.filter(is_active=True, student=user)
     weekly = Attendance.objects.filter(is_active=True, user=user)
     
     month_serializer = StudentBankDetailSerializer(month, many=True)
