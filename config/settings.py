@@ -229,7 +229,13 @@ class Staging(Common):
     SECURE_PROXY_SSL_HEADER = values.TupleValue(
         ('HTTP_X_FORWARDED_PROTO', 'https')
     )
-
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    ALLOWED_HOSTS = ['maliyo.pythonanywhere.com', 
+                     'maliyo-api.herokuapp.com' ]
+    
+    DATABASES = values.DatabaseURLValue(
+        'sqlite:///{}'.format(os.path.join(Common.BASE_DIR, 'db.sqlite3'))
+    )
 
 class Production(Staging):
     """

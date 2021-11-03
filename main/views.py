@@ -6,7 +6,7 @@ from .models import Attendance, Bank, StudentBankDetail, User, batch_date
 from .serializers import AttendanceSerializer, BankSerializer, StudentBankDetailSerializer, StudentBankVerificationSerializer, StudentUploadSerializer
 from drf_yasg.utils import swagger_auto_schema
 from .helpers import upload
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 import csv
@@ -258,4 +258,27 @@ def get_records(request):
     serializer = AttendanceSerializer(obj, many=True)
     
     return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAdminUser])  
+def user_details(request, user_id):
+    try:
+        user = User.objects.get(id=user_id, is_active=True)
+    except User.DoesNotExist:
+        return Response({"error":'Does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    
+    month = StudentBankDetail.objects.filter(is_active=True, user=user)
+    weekly = Attendance.objects.filter(is_active=True, user=user)
+    
+    month_serializer = StudentBankDetailSerializer(month, many=True)
+    week_serializer = AttendanceSerializer(weekly, many=True)
+    
+    data = {
+        'monthly_verification':month_serializer.data,
+        'weekly_updates':week_serializer.data
+    }
+    
+    return Response(data, status=status.HTTP_200_OK)
     
