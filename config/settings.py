@@ -14,8 +14,9 @@ from configurations import Configuration, values
 from django.utils.timezone import timedelta
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
+from dotenv import load_dotenv, find_dotenv
 
-
+load_dotenv(find_dotenv())
 
 class Common(Configuration):
     # Build paths inside the project like this: BASE_DIR / 'subdir'.
