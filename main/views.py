@@ -263,7 +263,7 @@ def get_records(request):
 @api_view(['GET'])
 @authentication_classes([JWTAuthentication])
 @permission_classes([IsAdminUser])  
-def user_details(request, user_id):
+def user_record(request, user_id):
     try:
         user = User.objects.get(id=user_id, is_active=True)
     except User.DoesNotExist:
