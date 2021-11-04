@@ -10,7 +10,7 @@ User=get_user_model()
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
-        User.objects.all().delete()
+        # User.objects.filter(is_staff=False, is_admin=False).delete()
         with open('account/management/commands/user_data.csv', mode='r', encoding='UTF-8') as csv_file:
             csv_reader = csv.DictReader(csv_file)
             # line_count = 0
@@ -22,7 +22,10 @@ class Command(BaseCommand):
                 all = lower + upper + num + symbols
                 password = "".join(random.sample(all,8))
                 row['password'] = password
-                user = User.objects.create(**row)
-                user.set_password(password)
-                user.save()
+                if User.objects.filter(email=row['email'], is_active=True).exists():
+                    continue
+                else:
+                    user = User.objects.create(**row)
+                    user.set_password(password)
+                    user.save()
 

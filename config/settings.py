@@ -144,7 +144,7 @@ class Common(Configuration):
     ]
     
     DEFAULT_FROM_EMAIL = 'admin@pay.maliyo.com'
-    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
     EMAIL_HOST = 'smtp.gmass.co'
     EMAIL_USE_TLS = True
     EMAIL_PORT = 465

@@ -122,7 +122,7 @@ class StudentBankDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = StudentBankDetail
-        fields = ['account_number', 'account_name', 'recipient_code', 'bank', 'student', 'student_name', 'bank_name', 'date_added']
+        fields = ['account_number', 'account_name', 'recipient_code', 'month','bank', 'student', 'student_name', 'bank_name', 'date_added', ]
         
     
     def add_recepient(self, request):
@@ -143,7 +143,7 @@ class StudentBankDetailSerializer(serializers.ModelSerializer):
         })
         
         if res.json()['status'] == True:
-            print(res.json()['data'])
+            # print(res.json()['data'])
             recipient_code = res.json()['data']['recipient_code'] 
             data = StudentBankDetail.objects.create(**self.validated_data, recipient_code=recipient_code, student=request.user)
             return data
