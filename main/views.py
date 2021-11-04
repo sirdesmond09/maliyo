@@ -150,7 +150,7 @@ def bank_verification(request):
         serializer = StudentBankVerificationSerializer(data = request.data)
 
         if serializer.is_valid():
-            if StudentBankDetail.objects.filter(student=request.user, month=batch_date, is_active=True).exists():
+            if StudentBankDetail.objects.filter(student=request.user, month=batch_date(), is_active=True).exists():
                 raise ValidationError(detail="Bank details already verified for this month. Please wait till next month.")
             
             data = serializer.verify_bank_details()

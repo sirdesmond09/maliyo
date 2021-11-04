@@ -24,7 +24,7 @@ class StudentBankDetail(models.Model):
     account_number = models.CharField(max_length=15)
     account_name = models.CharField(max_length=250)
     recipient_code = models.CharField(max_length=200, null=True, blank=True)
-    month = models.CharField(default=batch_date, max_length=300)
+    month = models.CharField(default=batch_date(), max_length=300)
     bank = models.ForeignKey(Bank, on_delete=models.DO_NOTHING)
     date_added = models.DateField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
